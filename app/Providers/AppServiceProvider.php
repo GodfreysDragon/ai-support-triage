@@ -2,9 +2,16 @@
 
 namespace App\Providers;
 
+use Anthropic\Client;
+use App\Ai\ClaudeSupportAssistant;
+use App\Ai\Contracts\SupportAssistant;
+use App\Ai\FakeSupportAssistant;
 use Carbon\CarbonImmutable;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 
@@ -15,7 +22,13 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->singleton(SupportAssistant::class, fn () => match (config('ai.driver')) {
+            'fake' => new FakeSupportAssistant(config('ai.fake_chunk_delay_ms')),
+            default => new ClaudeSupportAssistant(
+                new Client(apiKey: config('ai.anthropic.api_key')),
+                config('ai.anthropic.model'),
+            ),
+        });
     }
 
     /**
@@ -24,6 +37,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureDefaults();
+        $this->configureRateLimiting();
     }
 
     /**
@@ -46,5 +60,14 @@ class AppServiceProvider extends ServiceProvider
                 ->uncompromised()
             : null,
         );
+    }
+
+    /**
+     * Per-user limits on the endpoints that call the model.
+     */
+    protected function configureRateLimiting(): void
+    {
+        RateLimiter::for('ai', fn (Request $request) => Limit::perMinute(config('ai.rate_limits.per_minute'))
+            ->by($request->user()?->id ?: $request->ip()));
     }
 }
