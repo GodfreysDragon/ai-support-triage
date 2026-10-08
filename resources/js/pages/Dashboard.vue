@@ -2,7 +2,7 @@
 import { Head, Link } from '@inertiajs/vue3';
 import { AlertTriangle, Clock, Inbox, Siren } from '@lucide/vue';
 import { computed } from 'vue';
-import TicketBadges from '@/components/TicketBadges.vue';
+import TicketBadges from '@/components/tickets/TicketBadges.vue';
 import { Button } from '@/components/ui/button';
 import {
     Card,

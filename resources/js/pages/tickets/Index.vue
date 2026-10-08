@@ -5,7 +5,7 @@ import { computed, watch } from 'vue';
 import TicketController from '@/actions/App/Http/Controllers/TicketController';
 import Heading from '@/components/Heading.vue';
 import InputError from '@/components/InputError.vue';
-import TicketBadges from '@/components/TicketBadges.vue';
+import TicketBadges from '@/components/tickets/TicketBadges.vue';
 import { Button } from '@/components/ui/button';
 import {
     Card,
