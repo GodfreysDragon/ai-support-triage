@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\TicketPriority;
-use App\Enums\TicketStatus;
 use App\Http\Resources\TicketResource;
 use App\Models\Ticket;
 use Illuminate\Http\Request;
@@ -17,22 +15,22 @@ class DashboardController extends Controller
      */
     public function __invoke(Request $request): Response
     {
-        $tickets = $request->user()->tickets();
+        $user = $request->user();
 
         return Inertia::render('Dashboard', [
             'stats' => [
-                'total' => (clone $tickets)->count(),
-                'pending' => (clone $tickets)->where('status', TicketStatus::Pending)->count(),
-                'urgent' => (clone $tickets)->where('priority', TicketPriority::Urgent)->count(),
-                'failed' => (clone $tickets)->where('status', TicketStatus::Failed)->count(),
+                'total' => $user->tickets()->count(),
+                'pending' => $user->tickets()->pending()->count(),
+                'urgent' => $user->tickets()->urgent()->count(),
+                'failed' => $user->tickets()->failed()->count(),
             ],
-            'byCategory' => (clone $tickets)->toBase()
+            'byCategory' => $user->tickets()->toBase()
                 ->whereNotNull('category')
                 ->selectRaw('category, count(*) as count')
                 ->groupBy('category')
                 ->orderByDesc('count')
                 ->pluck('count', 'category'),
-            'recent' => (clone $tickets)->latest()->limit(5)->get()
+            'recent' => $user->tickets()->latest()->limit(5)->get()
                 ->map(fn (Ticket $ticket) => TicketResource::make($ticket)->resolve()),
         ]);
     }

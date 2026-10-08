@@ -6,7 +6,6 @@ use Anthropic\Core\Exceptions\APIConnectionException;
 use Anthropic\Core\Exceptions\InternalServerException;
 use Anthropic\Core\Exceptions\RateLimitException;
 use App\Ai\Contracts\SupportAssistant;
-use App\Enums\TicketStatus;
 use App\Models\Ticket;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -53,24 +52,17 @@ class TriageTicket implements ShouldBeUnique, ShouldQueue
     {
         try {
             $result = $assistant->triage($this->ticket);
-        } catch (RateLimitException|InternalServerException|APIConnectionException $e) {
-            // Transient: the SDK already retried a couple of times; let the
-            // queue retry later with backoff.
-            throw $e;
         } catch (Throwable $e) {
-            // Refusals, bad requests, auth errors and malformed output won't
-            // get better on retry.
+            if (self::isTransient($e)) {
+                throw $e;
+            }
+
             $this->fail($e);
 
             return;
         }
 
-        $this->ticket->update([
-            ...$result->toAttributes(),
-            'status' => TicketStatus::Triaged,
-            'triaged_at' => now(),
-            'error' => null,
-        ]);
+        $this->ticket->markTriaged($result);
     }
 
     /**
@@ -79,9 +71,19 @@ class TriageTicket implements ShouldBeUnique, ShouldQueue
      */
     public function failed(?Throwable $exception): void
     {
-        $this->ticket->update([
-            'status' => TicketStatus::Failed,
-            'error' => $exception?->getMessage() ?? 'Triage failed.',
-        ]);
+        $this->ticket->markFailed($exception?->getMessage() ?? 'Triage failed.');
+    }
+
+    /**
+     * Rate limits, overloads and dropped connections are worth retrying: the
+     * SDK has already retried a couple of times, so the queue tries again
+     * later with backoff. Refusals, bad requests, auth errors and malformed
+     * output won't get better on retry, so they fail straight away.
+     */
+    private static function isTransient(Throwable $e): bool
+    {
+        return $e instanceof RateLimitException
+            || $e instanceof InternalServerException
+            || $e instanceof APIConnectionException;
     }
 }

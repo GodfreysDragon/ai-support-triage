@@ -17,6 +17,20 @@ return [
     'anthropic' => [
         'api_key' => env('ANTHROPIC_API_KEY'),
         'model' => env('ANTHROPIC_MODEL', 'claude-opus-5-5'),
+
+        // Classification is short, schema-bound output: low effort and a
+        // small token budget are enough.
+        'triage' => [
+            'max_tokens' => 4096,
+            'effort' => 'low',
+        ],
+
+        // Drafting is customer-facing prose, so it gets more effort and
+        // room to write.
+        'reply' => [
+            'max_tokens' => 16000,
+            'effort' => 'medium',
+        ],
     ],
 
     /*

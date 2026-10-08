@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\TicketStatus;
+use App\Http\Requests\StoreTicketRequest;
 use App\Http\Resources\TicketResource;
 use App\Jobs\TriageTicket;
 use App\Models\Ticket;
@@ -32,15 +32,9 @@ class TicketController extends Controller
     /**
      * Store a new ticket and queue it for AI triage.
      */
-    public function store(Request $request): RedirectResponse
+    public function store(StoreTicketRequest $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'customer_email' => ['nullable', 'email', 'max:255'],
-            'subject' => ['required', 'string', 'max:255'],
-            'body' => ['required', 'string', 'max:10000'],
-        ]);
-
-        $ticket = $request->user()->tickets()->create($validated);
+        $ticket = $request->user()->tickets()->create($request->validated());
 
         TriageTicket::dispatch($ticket);
 
@@ -66,7 +60,7 @@ class TicketController extends Controller
     {
         Gate::authorize('update', $ticket);
 
-        $ticket->update(['status' => TicketStatus::Pending, 'error' => null]);
+        $ticket->markPending();
 
         TriageTicket::dispatch($ticket);
 
