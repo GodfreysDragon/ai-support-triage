@@ -46,3 +46,6 @@ yarn-error.log
 # Local project notes (not part of the repo)
 PROJECT_SUMMARY.md
 PROGRESS.md
+
+# Pest browser test failure screenshots
+/tests/Browser/Screenshots

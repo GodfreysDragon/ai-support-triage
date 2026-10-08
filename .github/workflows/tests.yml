@@ -11,7 +11,8 @@ permissions:
 
 jobs:
   ci:
-    runs-on: ubuntu-latest
+    # Pinned so the move of ubuntu-latest to Ubuntu 26 (2026-10-19) does not change CI unannounced.
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Checkout code
@@ -33,6 +34,9 @@ jobs:
 
       - name: Setup Application
         run: composer setup
+
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
 
       - name: Run CI Checks
         run: composer ci:check
