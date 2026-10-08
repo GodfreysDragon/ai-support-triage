@@ -35,7 +35,7 @@ export type Paginated<T> = {
     total: number;
 };
 
-/** Events emitted by the reply SSE endpoint. */
+/** Events emitted by the reply SSE endpoint (App\Http\Controllers\TicketReplyController). */
 export type ReplyStreamEvent =
     | { type: 'delta'; text: string }
     | { type: 'done' }

@@ -16,7 +16,8 @@ class TicketReplyController extends Controller
      * Stream a drafted reply to the browser as server-sent events.
      *
      * Each event is JSON: {type: "delta", text} while generating, then
-     * {type: "done"} or {type: "error", message}.
+     * {type: "done"} or {type: "error", message}. Keep this in sync with
+     * ReplyStreamEvent in resources/js/types/tickets.ts.
      */
     public function __invoke(Request $request, Ticket $ticket, SupportAssistant $assistant): StreamedResponse
     {

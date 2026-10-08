@@ -13,22 +13,25 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Throwable;
 
+/**
+ * Classifies a newly created (or retried) ticket in the background, so the
+ * request that created it returns immediately. The ticket page polls until
+ * the status leaves "pending".
+ */
 class TriageTicket implements ShouldBeUnique, ShouldQueue
 {
     use Queueable;
 
     /**
-     * The number of times the job may be attempted.
+     * One first attempt plus one retry per backoff() step.
      */
     public int $tries = 4;
 
-    /**
-     * Create a new job instance.
-     */
     public function __construct(public Ticket $ticket) {}
 
     /**
-     * Seconds to wait between retries (rate limits and overloads ease off).
+     * Seconds to wait between retries, growing so rate limits and overloads
+     * have time to ease off.
      *
      * @return list<int>
      */
@@ -38,16 +41,14 @@ class TriageTicket implements ShouldBeUnique, ShouldQueue
     }
 
     /**
-     * Only one triage per ticket may be queued at a time.
+     * Only one triage per ticket may be queued at a time, so a double-clicked
+     * "Retry triage" doesn't spend tokens twice.
      */
     public function uniqueId(): string
     {
         return (string) $this->ticket->id;
     }
 
-    /**
-     * Execute the job.
-     */
     public function handle(SupportAssistant $assistant): void
     {
         try {
@@ -73,7 +74,8 @@ class TriageTicket implements ShouldBeUnique, ShouldQueue
     }
 
     /**
-     * Handle a job failure.
+     * Runs after the last retry, or straight away for a permanent error.
+     * The message is shown to the agent next to the "Retry triage" button.
      */
     public function failed(?Throwable $exception): void
     {

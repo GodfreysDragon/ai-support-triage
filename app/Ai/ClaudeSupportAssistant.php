@@ -15,6 +15,14 @@ use Generator;
 use JsonException;
 use UnexpectedValueException;
 
+/**
+ * The real SupportAssistant, backed by the Claude API. Triage runs inside the
+ * TriageTicket job; streamReply() feeds TicketReplyController's SSE stream.
+ *
+ * Ticket text is always wrapped in <ticket> tags so the system prompts can
+ * mark everything inside as untrusted customer input (a prompt-injection
+ * boundary), separate from our own instructions.
+ */
 class ClaudeSupportAssistant implements SupportAssistant
 {
     /**
@@ -44,6 +52,11 @@ class ClaudeSupportAssistant implements SupportAssistant
         private readonly string $model,
     ) {}
 
+    /**
+     * Classification is short, schema-bound output, so low effort and a small
+     * token budget are enough; the json_schema format guarantees the reply
+     * decodes into a TriageResult.
+     */
     public function triage(Ticket $ticket): TriageResult
     {
         $message = $this->client->beta->messages->create(
@@ -76,6 +89,11 @@ class ClaudeSupportAssistant implements SupportAssistant
         throw new UnexpectedValueException("Triage response had no text block (stop reason: {$message->stopReason}).");
     }
 
+    /**
+     * Drafting is customer-facing prose, so it gets medium effort and a large
+     * token budget. The triage result, when there is one, is passed along so
+     * the draft matches the ticket's priority and the customer's mood.
+     */
     public function streamReply(Ticket $ticket, ?string $guidance = null): Generator
     {
         $prompt = $this->ticketPrompt($ticket);

@@ -51,7 +51,7 @@ final readonly class TriageResult
                 'priority' => [
                     'type' => 'string',
                     'enum' => $values(TicketPriority::class),
-                    'description' => 'urgent = outage, data loss, security or payment failure blocking the customer; high = core feature broken; medium = degraded or confusing; low = questions and suggestions.',
+                    'description' => TicketPriority::definitions(),
                 ],
                 'sentiment' => ['type' => 'string', 'enum' => $values(Sentiment::class)],
                 'summary' => ['type' => 'string', 'description' => 'One sentence an agent can scan in a queue.'],
