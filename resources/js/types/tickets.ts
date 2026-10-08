@@ -1,3 +1,4 @@
+// These mirror the PHP enums in app/Enums/. Add a case there and here together.
 export type TicketStatus = 'pending' | 'triaged' | 'failed';
 export type TicketCategory =
     | 'billing'
@@ -9,6 +10,7 @@ export type TicketCategory =
 export type TicketPriority = 'low' | 'medium' | 'high' | 'urgent';
 export type Sentiment = 'positive' | 'neutral' | 'negative' | 'angry';
 
+/** A ticket as sent by App\Http\Resources\TicketResource. */
 export type Ticket = {
     id: number;
     customer_email: string | null;
