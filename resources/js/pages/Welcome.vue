@@ -23,8 +23,7 @@ const page = usePage();
             <p
                 class="mt-4 text-lg text-balance text-muted-foreground sm:text-xl"
             >
-                Every support ticket sorted by urgency, with a reply already
-                drafted.
+                Never fall behind on support again.
             </p>
 
             <div class="mt-10 flex flex-wrap justify-center gap-3">

@@ -17,7 +17,7 @@ use App\Models\User;
 test('the landing page names the app and invites guests in', function () {
     visit('/')
         ->assertSee(config('app.name'))
-        ->assertSee('Every support ticket sorted by urgency, with a reply already drafted.')
+        ->assertSee('Never fall behind on support again.')
         ->assertSee('Get started')
         ->assertSee('Log in')
         ->assertNoJavaScriptErrors();
