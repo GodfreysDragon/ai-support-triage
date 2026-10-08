@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\TicketPriority;
 use App\Enums\TicketStatus;
+use App\Http\Resources\TicketResource;
 use App\Models\Ticket;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -32,7 +33,7 @@ class DashboardController extends Controller
                 ->orderByDesc('count')
                 ->pluck('count', 'category'),
             'recent' => (clone $tickets)->latest()->limit(5)->get()
-                ->map(fn (Ticket $ticket) => TicketController::present($ticket)),
+                ->map(fn (Ticket $ticket) => TicketResource::make($ticket)->resolve()),
         ]);
     }
 }
