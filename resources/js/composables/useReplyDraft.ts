@@ -1,13 +1,16 @@
 import { StreamResponseError, useJsonEventStream } from '@laravel/stream-vue';
 import type { ComputedRef, Ref } from 'vue';
 import { computed, ref } from 'vue';
+import { copyToClipboard } from '@/lib/clipboard';
 import { reply } from '@/routes/tickets';
 import type { ReplyStreamEvent, Ticket } from '@/types';
+
+export type CopyState = 'idle' | 'copied' | 'failed';
 
 export type UseReplyDraftReturn = {
     draft: Ref<string>;
     error: Ref<string | null>;
-    copied: Ref<boolean>;
+    copyState: Ref<CopyState>;
     busy: ComputedRef<boolean>;
     isFetching: Readonly<Ref<boolean>>;
     isStreaming: Readonly<Ref<boolean>>;
@@ -26,7 +29,7 @@ export type UseReplyDraftReturn = {
 export function useReplyDraft(ticket: () => Ticket): UseReplyDraftReturn {
     const draft = ref(ticket().draft_reply ?? '');
     const error = ref<string | null>(null);
-    const copied = ref(false);
+    const copyState = ref<CopyState>('idle');
 
     const { send, cancel, isFetching, isStreaming } = useJsonEventStream<
         ReplyStreamEvent,
@@ -58,16 +61,22 @@ export function useReplyDraft(ticket: () => Ticket): UseReplyDraftReturn {
         void send({ guidance });
     };
 
+    // The button shows "Copied" or "Copy failed" briefly, then resets.
     const copy = async () => {
-        await navigator.clipboard.writeText(draft.value);
-        copied.value = true;
-        setTimeout(() => (copied.value = false), 1500);
+        try {
+            await copyToClipboard(draft.value);
+            copyState.value = 'copied';
+        } catch {
+            copyState.value = 'failed';
+        }
+
+        setTimeout(() => (copyState.value = 'idle'), 2000);
     };
 
     return {
         draft,
         error,
-        copied,
+        copyState,
         busy,
         isFetching,
         isStreaming,
