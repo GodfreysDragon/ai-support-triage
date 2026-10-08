@@ -4,6 +4,7 @@ namespace App\Ai;
 
 use Anthropic\Beta\Messages\BetaRawContentBlockDeltaEvent;
 use Anthropic\Beta\Messages\BetaRawMessageDeltaEvent;
+use Anthropic\Beta\Messages\BetaTextBlock;
 use Anthropic\Beta\Messages\BetaTextDelta;
 use Anthropic\Client;
 use App\Ai\Contracts\SupportAssistant;
@@ -63,7 +64,7 @@ class ClaudeSupportAssistant implements SupportAssistant
         }
 
         foreach ($message->content as $block) {
-            if ($block->type === 'text') {
+            if ($block instanceof BetaTextBlock) {
                 try {
                     return TriageResult::fromArray(json_decode($block->text, true, flags: JSON_THROW_ON_ERROR));
                 } catch (JsonException $e) {

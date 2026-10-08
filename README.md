@@ -8,18 +8,18 @@ Agents paste in a customer support ticket. A **queued job** classifies it with C
 
 ## What it demonstrates
 
-| Concern | Where |
-| --- | --- |
-| Auth (login, 2FA, passkeys, email verification) | Laravel Vue starter kit (Fortify) |
-| Per-user authorization | `app/Policies/TicketPolicy.php` |
-| Background AI work with retries and backoff | `app/Jobs/TriageTicket.php` |
-| Schema-guaranteed JSON from the model | `app/Ai/Data/TriageResult.php` → `outputConfig.format` |
-| Streaming LLM output to the browser (SSE) | `app/Http/Controllers/TicketReplyController.php` + `useJsonEventStream` in `resources/js/pages/tickets/Show.vue` |
-| Live status updates without websockets | Inertia `usePoll` while a ticket is pending |
-| Rate limiting the endpoints that spend tokens | `throttle:ai` limiter in `AppServiceProvider` |
-| Swappable AI provider | `App\Ai\Contracts\SupportAssistant` (Claude implementation + offline fake) |
-| Refusal handling and server-side fallback | `ClaudeSupportAssistant` (`fallbacks: 'default'`) |
-| Tests that never hit the network | `tests/Feature/TicketTest.php` |
+| Concern                                         | Where                                                                                                            |
+| ----------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| Auth (login, 2FA, passkeys, email verification) | Laravel Vue starter kit (Fortify)                                                                                |
+| Per-user authorization                          | `app/Policies/TicketPolicy.php`                                                                                  |
+| Background AI work with retries and backoff     | `app/Jobs/TriageTicket.php`                                                                                      |
+| Schema-guaranteed JSON from the model           | `app/Ai/Data/TriageResult.php` → `outputConfig.format`                                                           |
+| Streaming LLM output to the browser (SSE)       | `app/Http/Controllers/TicketReplyController.php` + `useJsonEventStream` in `resources/js/pages/tickets/Show.vue` |
+| Live status updates without websockets          | Inertia `usePoll` while a ticket is pending                                                                      |
+| Rate limiting the endpoints that spend tokens   | `throttle:ai` limiter in `AppServiceProvider`                                                                    |
+| Swappable AI provider                           | `App\Ai\Contracts\SupportAssistant` (Claude implementation + offline fake)                                       |
+| Refusal handling and server-side fallback       | `ClaudeSupportAssistant` (`fallbacks: 'default'`)                                                                |
+| Tests that never hit the network                | `tests/Feature/TicketTest.php`                                                                                   |
 
 ## How a request flows
 
