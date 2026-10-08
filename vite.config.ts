@@ -8,15 +8,21 @@ import { defineConfig, lazyPlugins } from 'vite-plus';
 
 export default defineConfig({
     plugins: lazyPlugins(() => [
-        laravel({
-            input: ['resources/css/app.css', 'resources/js/app.ts'],
-            refresh: true,
-            fonts: [
-                bunny('Instrument Sans', {
-                    weights: [400, 500, 600],
-                }),
-            ],
-        }),
+        // Unit tests don't serve assets, and the Laravel plugin refuses to
+        // start a dev server when CI is set, so Vitest runs without it.
+        ...(process.env.VITEST
+            ? []
+            : [
+                  laravel({
+                      input: ['resources/css/app.css', 'resources/js/app.ts'],
+                      refresh: true,
+                      fonts: [
+                          bunny('Instrument Sans', {
+                              weights: [400, 500, 600],
+                          }),
+                      ],
+                  }),
+              ]),
         inertia(),
         tailwindcss(),
         vue({
@@ -41,6 +47,11 @@ export default defineConfig({
                 '**/vendor/**',
             ],
         },
+    },
+    resolve: {
+        // Same as the Laravel plugin's alias, declared here so it also
+        // applies when Vitest runs without that plugin.
+        alias: { '@': '/resources/js' },
     },
     test: {
         // Only the app's own unit tests; vendor/ ships test files of its own.
