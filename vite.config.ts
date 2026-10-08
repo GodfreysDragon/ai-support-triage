@@ -42,6 +42,10 @@ export default defineConfig({
             ],
         },
     },
+    test: {
+        // Only the app's own unit tests; vendor/ ships test files of its own.
+        include: ['resources/js/**/*.test.ts'],
+    },
     lint: {
         ignorePatterns: [
             'vendor/**',
