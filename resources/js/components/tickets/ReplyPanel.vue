@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { Check, Copy, Sparkles, Square } from '@lucide/vue';
-import { ref } from 'vue';
+import { Check, Copy, Sparkles, Square, X } from '@lucide/vue';
+import { computed, ref } from 'vue';
 import AlertError from '@/components/AlertError.vue';
 import { Button } from '@/components/ui/button';
 import {
@@ -24,7 +24,7 @@ const guidance = ref('');
 const {
     draft,
     error,
-    copied,
+    copyState,
     busy,
     isFetching,
     isStreaming,
@@ -32,6 +32,15 @@ const {
     cancel,
     copy,
 } = useReplyDraft(() => props.ticket);
+
+const copyButton = computed(
+    () =>
+        ({
+            idle: { icon: Copy, label: 'Copy' },
+            copied: { icon: Check, label: 'Copied' },
+            failed: { icon: X, label: 'Copy failed' },
+        })[copyState.value],
+);
 </script>
 
 <template>
@@ -64,8 +73,8 @@ const {
                     <Square /> Stop
                 </Button>
                 <Button v-if="draft && !busy" variant="ghost" @click="copy">
-                    <component :is="copied ? Check : Copy" />
-                    {{ copied ? 'Copied' : 'Copy' }}
+                    <component :is="copyButton.icon" />
+                    {{ copyButton.label }}
                 </Button>
             </div>
 
