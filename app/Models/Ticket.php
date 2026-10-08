@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use App\Ai\Data\TriageResult;
 use App\Enums\Sentiment;
 use App\Enums\TicketCategory;
 use App\Enums\TicketPriority;
 use App\Enums\TicketStatus;
 use Database\Factories\TicketFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -44,7 +47,7 @@ class Ticket extends Model
      * @var array<string, mixed>
      */
     protected $attributes = [
-        'status' => 'pending',
+        'status' => TicketStatus::Pending->value,
     ];
 
     /**
@@ -70,5 +73,66 @@ class Ticket extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /*
+    | A ticket moves pending -> triaged, or pending -> failed -> pending (retry).
+    */
+
+    public function markTriaged(TriageResult $result): void
+    {
+        $this->update([
+            ...$result->toAttributes(),
+            'status' => TicketStatus::Triaged,
+            'triaged_at' => now(),
+            'error' => null,
+        ]);
+    }
+
+    public function markFailed(string $error): void
+    {
+        $this->update([
+            'status' => TicketStatus::Failed,
+            'error' => $error,
+        ]);
+    }
+
+    /**
+     * Put the ticket back in the queue's waiting state before re-dispatching
+     * TriageTicket. Earlier triage fields are kept until the new result lands.
+     */
+    public function markPending(): void
+    {
+        $this->update([
+            'status' => TicketStatus::Pending,
+            'error' => null,
+        ]);
+    }
+
+    /**
+     * @param  Builder<Ticket>  $query
+     */
+    #[Scope]
+    protected function pending(Builder $query): void
+    {
+        $query->where('status', TicketStatus::Pending);
+    }
+
+    /**
+     * @param  Builder<Ticket>  $query
+     */
+    #[Scope]
+    protected function failed(Builder $query): void
+    {
+        $query->where('status', TicketStatus::Failed);
+    }
+
+    /**
+     * @param  Builder<Ticket>  $query
+     */
+    #[Scope]
+    protected function urgent(Builder $query): void
+    {
+        $query->where('priority', TicketPriority::Urgent);
     }
 }

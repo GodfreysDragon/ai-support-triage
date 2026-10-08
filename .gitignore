@@ -42,3 +42,7 @@ yarn-error.log
 /boost.json
 /opencode.json
 /opencode.jsonc
+
+# Local project notes (not part of the repo)
+PROJECT_SUMMARY.md
+PROGRESS.md

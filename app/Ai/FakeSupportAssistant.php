@@ -59,7 +59,8 @@ class FakeSupportAssistant implements SupportAssistant
             .($guidance ? "(Agent guidance applied: {$guidance})\n\n" : '')
             ."Best regards,\nThe Support Team";
 
-        foreach (preg_split('/(?<=\s)/', $reply) as $chunk) {
+        // Split after each whitespace character so chunks arrive word by word.
+        foreach (preg_split('/(?<=\s)/', $reply) ?: [$reply] as $chunk) {
             if ($this->chunkDelayMs > 0) {
                 usleep($this->chunkDelayMs * 1000);
             }

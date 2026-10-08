@@ -2,7 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\TicketStatus;
+use App\Http\Requests\StoreTicketRequest;
+use App\Http\Resources\TicketResource;
 use App\Jobs\TriageTicket;
 use App\Models\Ticket;
 use Illuminate\Http\RedirectResponse;
@@ -21,7 +22,7 @@ class TicketController extends Controller
         $tickets = $request->user()->tickets()
             ->latest()
             ->paginate(15)
-            ->through(fn (Ticket $ticket) => self::present($ticket));
+            ->through(fn (Ticket $ticket) => TicketResource::make($ticket)->resolve());
 
         return Inertia::render('tickets/Index', [
             'tickets' => $tickets,
@@ -31,15 +32,9 @@ class TicketController extends Controller
     /**
      * Store a new ticket and queue it for AI triage.
      */
-    public function store(Request $request): RedirectResponse
+    public function store(StoreTicketRequest $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'customer_email' => ['nullable', 'email', 'max:255'],
-            'subject' => ['required', 'string', 'max:255'],
-            'body' => ['required', 'string', 'max:10000'],
-        ]);
-
-        $ticket = $request->user()->tickets()->create($validated);
+        $ticket = $request->user()->tickets()->create($request->validated());
 
         TriageTicket::dispatch($ticket);
 
@@ -54,7 +49,7 @@ class TicketController extends Controller
         Gate::authorize('view', $ticket);
 
         return Inertia::render('tickets/Show', [
-            'ticket' => self::present($ticket),
+            'ticket' => TicketResource::make($ticket)->resolve(),
         ]);
     }
 
@@ -65,33 +60,10 @@ class TicketController extends Controller
     {
         Gate::authorize('update', $ticket);
 
-        $ticket->update(['status' => TicketStatus::Pending, 'error' => null]);
+        $ticket->markPending();
 
         TriageTicket::dispatch($ticket);
 
         return back();
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    public static function present(Ticket $ticket): array
-    {
-        return [
-            'id' => $ticket->id,
-            'customer_email' => $ticket->customer_email,
-            'subject' => $ticket->subject,
-            'body' => $ticket->body,
-            'status' => $ticket->status,
-            'category' => $ticket->category,
-            'priority' => $ticket->priority,
-            'sentiment' => $ticket->sentiment,
-            'summary' => $ticket->summary,
-            'tags' => $ticket->tags ?? [],
-            'error' => $ticket->error,
-            'draft_reply' => $ticket->draft_reply,
-            'triaged_at' => $ticket->triaged_at?->toIso8601String(),
-            'created_at' => $ticket->created_at->toIso8601String(),
-        ];
     }
 }

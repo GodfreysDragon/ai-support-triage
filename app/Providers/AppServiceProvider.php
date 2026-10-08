@@ -6,6 +6,7 @@ use Anthropic\Client;
 use App\Ai\ClaudeSupportAssistant;
 use App\Ai\Contracts\SupportAssistant;
 use App\Ai\FakeSupportAssistant;
+use App\Ai\TicketPromptBuilder;
 use Carbon\CarbonImmutable;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -26,7 +27,10 @@ class AppServiceProvider extends ServiceProvider
             'fake' => new FakeSupportAssistant(config('ai.fake_chunk_delay_ms')),
             default => new ClaudeSupportAssistant(
                 new Client(apiKey: config('ai.anthropic.api_key')),
+                new TicketPromptBuilder,
                 config('ai.anthropic.model'),
+                config('ai.anthropic.triage'),
+                config('ai.anthropic.reply'),
             ),
         });
     }

@@ -1,23 +1,11 @@
 <script setup lang="ts">
-import { Head, Link, useForm, usePoll } from '@inertiajs/vue3';
+import { Head, Link, usePoll } from '@inertiajs/vue3';
 import { Inbox } from '@lucide/vue';
 import { computed, watch } from 'vue';
-import TicketController from '@/actions/App/Http/Controllers/TicketController';
 import Heading from '@/components/Heading.vue';
-import InputError from '@/components/InputError.vue';
-import TicketBadges from '@/components/TicketBadges.vue';
+import NewTicketForm from '@/components/tickets/NewTicketForm.vue';
+import TicketBadges from '@/components/tickets/TicketBadges.vue';
 import { Button } from '@/components/ui/button';
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Spinner } from '@/components/ui/spinner';
-import { Textarea } from '@/components/ui/textarea';
 import { index, show } from '@/routes/tickets';
 import type { Paginated, Ticket } from '@/types';
 
@@ -30,37 +18,6 @@ defineOptions({
         breadcrumbs: [{ title: 'Tickets', href: index() }],
     },
 });
-
-const form = useForm({
-    customer_email: '',
-    subject: '',
-    body: '',
-});
-
-const samples = [
-    {
-        customer_email: 'ops@acme.test',
-        subject: 'Dashboard returns 500 since this morning',
-        body: 'Since about 9am every page in the dashboard returns a 500 error for our whole team. We have a board review at 2pm and cannot export anything. Please help ASAP.',
-    },
-    {
-        customer_email: 'finance@globex.test',
-        subject: 'Charged twice for September',
-        body: 'We were billed twice for our September invoice (INV-2291). Can you refund the duplicate charge? This is the second time this has happened, which is pretty frustrating.',
-    },
-    {
-        customer_email: 'sam@initech.test',
-        subject: 'Can we schedule recurring exports?',
-        body: 'Love the product! Is there a way to schedule the CSV export to run every Monday and email it to my team? If not, that would be a great feature.',
-    },
-];
-
-const useSample = (sample: (typeof samples)[number]) => {
-    form.clearErrors();
-    Object.assign(form, sample);
-};
-
-const submit = () => form.submit(TicketController.store());
 
 // Keep the list fresh while any ticket is still waiting for triage.
 const hasPending = computed(() =>
@@ -86,64 +43,7 @@ const formatDate = (iso: string) =>
     <Head title="Tickets" />
 
     <div class="grid gap-6 p-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
-        <Card class="h-fit">
-            <CardHeader>
-                <CardTitle>New ticket</CardTitle>
-                <CardDescription>
-                    Paste in a customer message. It's triaged in the background
-                    by a queued job.
-                </CardDescription>
-            </CardHeader>
-            <CardContent>
-                <form class="space-y-4" @submit.prevent="submit">
-                    <div class="grid gap-2">
-                        <Label for="customer_email">Customer email</Label>
-                        <Input
-                            id="customer_email"
-                            v-model="form.customer_email"
-                            type="email"
-                            placeholder="customer@example.com"
-                        />
-                        <InputError :message="form.errors.customer_email" />
-                    </div>
-                    <div class="grid gap-2">
-                        <Label for="subject">Subject</Label>
-                        <Input id="subject" v-model="form.subject" required />
-                        <InputError :message="form.errors.subject" />
-                    </div>
-                    <div class="grid gap-2">
-                        <Label for="body">Message</Label>
-                        <Textarea
-                            id="body"
-                            v-model="form.body"
-                            rows="7"
-                            required
-                        />
-                        <InputError :message="form.errors.body" />
-                    </div>
-
-                    <div class="flex flex-wrap items-center gap-2">
-                        <Button type="submit" :disabled="form.processing">
-                            <Spinner v-if="form.processing" />
-                            Submit for triage
-                        </Button>
-                        <span class="text-xs text-muted-foreground">
-                            or try a sample:
-                        </span>
-                        <Button
-                            v-for="(sample, i) in samples"
-                            :key="i"
-                            type="button"
-                            size="sm"
-                            variant="outline"
-                            @click="useSample(sample)"
-                        >
-                            {{ i + 1 }}
-                        </Button>
-                    </div>
-                </form>
-            </CardContent>
-        </Card>
+        <NewTicketForm />
 
         <section>
             <Heading
