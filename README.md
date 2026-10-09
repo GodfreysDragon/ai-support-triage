@@ -63,6 +63,17 @@ ANTHROPIC_MODEL=claude-opus-5-5
 > polling until it finishes. Serve the app through [Herd](https://herd.laravel.com) (or any php-fpm setup)
 > instead of `php artisan serve`.
 
+## Deploy (free, on Render)
+
+The repo includes a [Render Blueprint](render.yaml) and a production [`Dockerfile`](Dockerfile).
+In the Render dashboard choose **New → Blueprint**, pick this repository and confirm. That's it: the
+free web service builds the image, generates `APP_KEY`, creates and migrates SQLite at boot, and runs
+the demo on the fake driver. A [`docker` workflow](.github/workflows/docker.yml) builds the same image
+on every pull request and smoke-tests it, including Try the demo and a streamed reply.
+
+The free plan sleeps after 15 idle minutes (the next visit takes about a minute to wake it) and resets
+its disk on restart, which suits throwaway demo accounts.
+
 ## Engineering highlights
 
 | Concern                               | How                                                                                     |

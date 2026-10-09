@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'Laravel'),
+    'name' => env('APP_NAME', 'AI Support Triage'),
 
     /*
     |--------------------------------------------------------------------------
@@ -53,6 +53,14 @@ return [
     */
 
     'url' => env('APP_URL', 'http://localhost'),
+
+    /*
+    | Proxies whose X-Forwarded-* headers are trusted: "*" or a comma-separated
+    | list of IPs. Set it behind a TLS-terminating proxy (e.g. Render) so URLs
+    | are generated as https. Empty (the default) trusts none.
+    */
+
+    'trusted_proxies' => env('TRUSTED_PROXIES'),
 
     /*
     |--------------------------------------------------------------------------

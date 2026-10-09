@@ -9,6 +9,7 @@ use App\Ai\FakeSupportAssistant;
 use App\Ai\TicketPromptBuilder;
 use Carbon\CarbonImmutable;
 use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Http\Middleware\TrustProxies;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
@@ -51,6 +52,11 @@ class AppServiceProvider extends ServiceProvider
     {
         Date::use(CarbonImmutable::class);
 
+        $proxies = (string) config('app.trusted_proxies');
+        if ($proxies !== '') {
+            TrustProxies::at($proxies === '*' ? '*' : array_map(trim(...), explode(',', $proxies)));
+        }
+
         DB::prohibitDestructiveCommands(
             app()->isProduction(),
         );
@@ -74,8 +80,11 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('ai', fn (Request $request) => Limit::perMinute(config('ai.rate_limits.per_minute'))
             ->by($request->user()?->id ?: $request->ip()));
 
-        // Each "Try the demo" click creates an account, so cap it per visitor.
-        RateLimiter::for('demo', fn (Request $request) => Limit::perMinute(config('demo.per_minute'))
-            ->by($request->ip()));
+        // Each "Try the demo" click creates an account, so cap it per visitor,
+        // plus an overall hourly cap in case client IPs can be spoofed.
+        RateLimiter::for('demo', fn (Request $request) => [
+            Limit::perMinute(config('demo.per_minute'))->by($request->ip()),
+            Limit::perHour(config('demo.per_hour_total'))->by('demo-total'),
+        ]);
     }
 }
