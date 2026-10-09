@@ -51,7 +51,7 @@ const copyButton = computed(
         <CardHeader>
             <CardTitle>Draft a reply</CardTitle>
             <CardDescription>
-                Streamed token by token over server-sent events.
+                AI writes a first draft. Review it before sending.
             </CardDescription>
         </CardHeader>
         <CardContent class="space-y-4">

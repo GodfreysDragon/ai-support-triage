@@ -37,8 +37,8 @@ const submit = () => form.submit(TicketController.store());
         <CardHeader>
             <CardTitle>New ticket</CardTitle>
             <CardDescription>
-                Paste in a customer message. It's triaged in the background by a
-                queued job.
+                Paste in a customer message and AI sorts it by urgency in
+                seconds.
             </CardDescription>
         </CardHeader>
         <CardContent>
