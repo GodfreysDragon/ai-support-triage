@@ -17,4 +17,3 @@ bootstrap/cache/*.php
 database/*.sqlite
 tests
 PROGRESS.md
-PROJECT_SUMMARY.md
