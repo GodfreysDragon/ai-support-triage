@@ -18,8 +18,19 @@ test('the landing page names the app and invites guests in', function () {
     visit('/')
         ->assertSee(config('app.name'))
         ->assertSee('Never fall behind on support again.')
-        ->assertSee('Get started')
+        ->assertSee('Try the demo')
+        ->assertSee('Create an account')
         ->assertSee('Log in')
+        ->assertNoJavaScriptErrors();
+});
+
+test('Try the demo opens a dashboard full of sample tickets', function () {
+    visit('/')
+        ->click('Try the demo')
+        ->assertPathIs('/dashboard')
+        ->assertSee("You're exploring a demo account")
+        ->assertSee('The AI is simulated')
+        ->assertSee('Checkout fails for every customer since the 2pm deploy')
         ->assertNoJavaScriptErrors();
 });
 

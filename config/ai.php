@@ -7,12 +7,13 @@ return [
     | AI Driver
     |--------------------------------------------------------------------------
     |
-    | "claude" calls the Anthropic API. "fake" uses a deterministic offline
-    | assistant so you can run and demo the app without an API key.
+    | "fake" (the default) uses a deterministic offline assistant, so the app
+    | runs and demos without an API key or cost. "claude" calls the Anthropic
+    | API.
     |
     */
 
-    'driver' => env('AI_DRIVER', 'claude'),
+    'driver' => env('AI_DRIVER', 'fake'),
 
     'anthropic' => [
         'api_key' => env('ANTHROPIC_API_KEY'),

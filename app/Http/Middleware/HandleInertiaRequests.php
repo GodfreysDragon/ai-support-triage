@@ -42,6 +42,8 @@ class HandleInertiaRequests extends Middleware
                 'user' => $request->user(),
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
+            // Lets the demo banner say whether replies come from the real model.
+            'aiSimulated' => config('ai.driver') === 'fake',
         ];
     }
 }
