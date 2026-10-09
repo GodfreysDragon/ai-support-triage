@@ -10,7 +10,7 @@ defineProps<{
 
 const priorityClass: Record<TicketPriority, string> = {
     urgent: 'border-transparent bg-red-600 text-white',
-    high: 'border-transparent bg-orange-500 text-white',
+    high: 'border-transparent bg-orange-700 text-white',
     medium: 'border-transparent bg-amber-200 text-amber-950 dark:bg-amber-400/80',
     low: 'border-transparent bg-secondary text-secondary-foreground',
 };

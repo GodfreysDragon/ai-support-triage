@@ -46,6 +46,7 @@ const categoryMax = computed(() =>
 
 <template>
     <Head title="Dashboard" />
+    <h1 class="sr-only">Dashboard</h1>
 
     <div class="flex h-full flex-1 flex-col gap-4 p-4">
         <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

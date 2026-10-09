@@ -67,11 +67,15 @@ class AppServiceProvider extends ServiceProvider
     }
 
     /**
-     * Per-user limits on the endpoints that call the model.
+     * Limits on the endpoints that call the model, and on demo sign-ups.
      */
     protected function configureRateLimiting(): void
     {
         RateLimiter::for('ai', fn (Request $request) => Limit::perMinute(config('ai.rate_limits.per_minute'))
             ->by($request->user()?->id ?: $request->ip()));
+
+        // Each "Try the demo" click creates an account, so cap it per visitor.
+        RateLimiter::for('demo', fn (Request $request) => Limit::perMinute(config('demo.per_minute'))
+            ->by($request->ip()));
     }
 }

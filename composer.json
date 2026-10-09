@@ -1,11 +1,18 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "laravel/vue-starter-kit",
+    "name": "godfreysdragon/ai-support-triage",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
+    "description": "AI support ticket triage and streaming reply drafts: Laravel 13, Vue 3, Inertia and the Claude API.",
     "keywords": [
         "laravel",
-        "framework"
+        "vue",
+        "inertia",
+        "claude",
+        "ai",
+        "llm",
+        "support",
+        "triage",
+        "sse"
     ],
     "license": "MIT",
     "require": {

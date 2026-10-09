@@ -34,11 +34,19 @@
         <link rel="icon" href="/favicon.svg" type="image/svg+xml">
         <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 
+        {{-- Description and link previews (search results, Slack, LinkedIn...) --}}
+        <meta name="description" content="Never fall behind on support again. AI triages every ticket by urgency and drafts the reply.">
+        <meta property="og:title" content="{{ config('app.name') }}">
+        <meta property="og:description" content="Never fall behind on support again. AI triages every ticket by urgency and drafts the reply.">
+        <meta property="og:image" content="{{ asset('og-image.png') }}">
+        <meta property="og:type" content="website">
+        <meta name="twitter:card" content="summary_large_image">
+
         @fonts
 
         @vite(['resources/css/app.css', 'resources/js/app.ts', "resources/js/pages/{$page['component']}.vue"])
         <x-inertia::head>
-            <title>{{ config('app.name', 'Laravel') }}</title>
+            <title>{{ config('app.name', 'AI Support Triage') }}</title>
         </x-inertia::head>
     </head>
     <body class="font-sans antialiased">
