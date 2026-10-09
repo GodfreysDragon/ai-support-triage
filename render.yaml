@@ -1,0 +1,26 @@
+# Render Blueprint: the public demo as one free web service.
+# Deploy: Render dashboard -> New -> Blueprint -> pick this repository.
+#
+# The free plan sleeps after 15 minutes without traffic (the next visit takes
+# about a minute to wake it) and resets the disk on every restart. That suits
+# the demo: SQLite is rebuilt at boot and demo accounts are throwaway.
+services:
+    - type: web
+      name: ai-support-triage
+      runtime: docker
+      plan: free
+      dockerfilePath: ./Dockerfile
+      healthCheckPath: /up
+      envVars:
+          - key: APP_KEY
+            generateValue: true
+          - key: APP_NAME
+            value: AI Support Triage
+          # Render terminates HTTPS at its proxy; trust it so URLs are https.
+          - key: TRUSTED_PROXIES
+            value: '*'
+          # Simulated AI: free and safe to leave open to the public.
+          - key: AI_DRIVER
+            value: fake
+          - key: DEMO_ENABLED
+            value: 'true'

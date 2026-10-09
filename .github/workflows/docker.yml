@@ -1,0 +1,68 @@
+name: docker
+
+# Builds the production image (the one render.yaml deploys) and smoke-tests the
+# running container: health check, landing page, Try the demo, and a streamed reply.
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  image:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Build image
+        run: docker build -t ai-support-triage .
+
+      - name: Start container
+        run: |
+          # A raw base64 key, like Render's generateValue, to exercise start.sh's prefixing.
+          docker run -d --name app -p 8080:10000 \
+            -e APP_KEY="$(openssl rand -base64 32)" \
+            ai-support-triage
+          for i in $(seq 1 30); do
+            curl -fsS http://localhost:8080/up >/dev/null && exit 0
+            sleep 2
+          done
+          docker logs app
+          exit 1
+
+      - name: Smoke test
+        run: |
+          set -eu
+          jar=$(mktemp)
+          base=http://localhost:8080
+
+          curl -fsS -c "$jar" "$base/" | grep -q 'AI Support Triage'
+          xsrf=$(awk '$6 == "XSRF-TOKEN" { print $7 }' "$jar" | python3 -c 'import sys, urllib.parse; print(urllib.parse.unquote(sys.stdin.read().strip()))')
+
+          # Try the demo: a fresh account, signed in, redirected to the dashboard.
+          status=$(curl -sS -o /dev/null -w '%{http_code}' -b "$jar" -c "$jar" \
+            -H "X-XSRF-TOKEN: $xsrf" -X POST "$base/demo")
+          test "$status" = 302
+          curl -fsS -b "$jar" "$base/dashboard" | grep -q 'Checkout fails for every customer'
+
+          # Stream a reply for the newest sample ticket.
+          # Inertia embeds the page props as JSON in <script data-page=...>.
+          ticket=$(curl -fsS -b "$jar" "$base/tickets" | python3 -c 'import json, re, sys; page = re.search(r"<script data-page=\"[^\"]*\" type=\"application/json\">(.*?)</script>", sys.stdin.read(), re.S).group(1); print(json.loads(page)["props"]["tickets"]["data"][0]["id"])')
+          xsrf=$(awk '$6 == "XSRF-TOKEN" { print $7 }' "$jar" | python3 -c 'import sys, urllib.parse; print(urllib.parse.unquote(sys.stdin.read().strip()))')
+          curl -fsS -N -b "$jar" -H "X-XSRF-TOKEN: $xsrf" -H 'Accept: text/event-stream' \
+            -H 'Content-Type: application/json' -d '{}' "$base/tickets/$ticket/reply" > reply.txt
+          grep -q '"type":"delta"' reply.txt
+          grep -q '"type":"done"' reply.txt
+          echo "Smoke test passed (ticket $ticket)."
+
+      - name: Container logs
+        if: always()
+        run: docker logs app 2>&1 | tail -50

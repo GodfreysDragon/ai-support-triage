@@ -83,6 +83,19 @@ test('demo sign-ups are rate limited per visitor', function () {
     $this->post(route('demo'))->assertTooManyRequests();
 });
 
+test('demo sign-ups are also capped across all visitors', function () {
+    config(['demo.per_minute' => 100, 'demo.per_hour_total' => 2]);
+
+    foreach (['10.0.0.1', '10.0.0.2'] as $ip) {
+        $this->withServerVariables(['REMOTE_ADDR' => $ip])->post(route('demo'));
+        Auth::logout();
+    }
+
+    $this->withServerVariables(['REMOTE_ADDR' => '10.0.0.3'])
+        ->post(route('demo'))
+        ->assertTooManyRequests();
+});
+
 test('demo mode can be switched off', function () {
     config(['demo.enabled' => false]);
 
