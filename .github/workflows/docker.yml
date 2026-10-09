@@ -45,13 +45,16 @@ jobs:
           base=http://localhost:8080
 
           curl -fsS -c "$jar" "$base/" | grep -q 'AI Support Triage'
+          echo 'Landing page OK'
           xsrf=$(awk '$6 == "XSRF-TOKEN" { print $7 }' "$jar" | python3 -c 'import sys, urllib.parse; print(urllib.parse.unquote(sys.stdin.read().strip()))')
 
           # Try the demo: a fresh account, signed in, redirected to the dashboard.
           status=$(curl -sS -o /dev/null -w '%{http_code}' -b "$jar" -c "$jar" \
             -H "X-XSRF-TOKEN: $xsrf" -X POST "$base/demo")
           test "$status" = 302
+          echo "Try the demo OK ($status)"
           curl -fsS -b "$jar" "$base/dashboard" | grep -q 'Checkout fails for every customer'
+          echo 'Dashboard with sample tickets OK'
 
           # Stream a reply for the newest sample ticket.
           # Inertia embeds the page props as JSON in <script data-page=...>.
