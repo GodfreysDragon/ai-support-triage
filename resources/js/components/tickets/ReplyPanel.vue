@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Check, Copy, Sparkles, Square, X } from '@lucide/vue';
+import { Check, Copy, Sparkles, Square, Undo2, X } from '@lucide/vue';
 import { computed, ref } from 'vue';
 import AlertError from '@/components/AlertError.vue';
 import { Button } from '@/components/ui/button';
@@ -25,11 +25,14 @@ const {
     draft,
     error,
     copyState,
+    stopped,
+    canRestore,
     busy,
     isFetching,
     isStreaming,
     generate,
-    cancel,
+    stop,
+    restore,
     copy,
 } = useReplyDraft(() => props.ticket);
 
@@ -69,14 +72,21 @@ const copyButton = computed(
                     <Sparkles />
                     {{ draft ? 'Regenerate' : 'Generate reply' }}
                 </Button>
-                <Button v-else variant="outline" @click="cancel">
+                <Button v-else variant="outline" @click="stop">
                     <Square /> Stop
+                </Button>
+                <Button v-if="canRestore" variant="outline" @click="restore">
+                    <Undo2 /> Restore saved draft
                 </Button>
                 <Button v-if="draft && !busy" variant="ghost" @click="copy">
                     <component :is="copyButton.icon" />
                     {{ copyButton.label }}
                 </Button>
             </div>
+
+            <p v-if="stopped && draft" class="text-sm text-muted-foreground">
+                Stopped. This partial draft isn't saved.
+            </p>
 
             <AlertError
                 v-if="error"

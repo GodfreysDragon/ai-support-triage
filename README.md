@@ -105,9 +105,20 @@ test suite always uses it.
 ## Tests
 
 ```bash
-php artisan test         # Pest only
-composer ci:check        # everything CI runs: formatting, lint, vue-tsc, Pint, PHPStan, Pest
+php artisan test         # Pest: unit, feature and browser tests
+npm test                 # Vitest: frontend unit tests (resources/js/**/*.test.ts)
+composer ci:check        # everything CI runs: formatting, lint, vue-tsc, Vitest, Pint, PHPStan, Pest
 ```
+
+| Layer          | Where                         | Notes                                                                                                                                                                      |
+| -------------- | ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Unit / feature | `tests/Unit`, `tests/Feature` | No network: the fake driver, or a recorded SDK transport for the Claude tests                                                                                              |
+| Browser        | `tests/Browser`               | Real Chromium via [Pest's browser plugin](https://pestphp.com/docs/browser-testing). Needs a frontend build (`npm run build`) and, once, `npx playwright install chromium` |
+| Frontend unit  | `resources/js/**/*.test.ts`   | Vitest, run through Vite+ (`vp test`)                                                                                                                                      |
+
+Reply streaming isn't browser-tested: the plugin's test server buffers responses, and `eventStream()` flushes
+that buffer after every event, so the browser receives an empty stream. The server side is covered in
+`tests/Feature/TicketTest.php` and the client side in `useReplyDraft.test.ts`.
 
 ## Design decisions
 
