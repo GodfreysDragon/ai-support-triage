@@ -12,7 +12,8 @@
 </p>
 
 <p align="center">
-  <strong>Live demo:</strong> <em>coming soon</em> · no sign-up needed, click <strong>Try the demo</strong>
+  <strong><a href="https://ai-support-triage-pyox.onrender.com">Live demo</a></strong> · no sign-up needed, click <strong>Try the demo</strong><br>
+  <sub>Free hosting: the first visit after a quiet spell can take up to a minute to wake the server.</sub>
 </p>
 
 <p align="center">
