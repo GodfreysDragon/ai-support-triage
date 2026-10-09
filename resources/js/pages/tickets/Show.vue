@@ -39,6 +39,7 @@ watch(
 
 <template>
     <Head :title="ticket.subject" />
+    <h1 class="sr-only">Ticket #{{ ticket.id }}</h1>
 
     <div class="grid gap-6 p-4 xl:grid-cols-2">
         <div class="space-y-6">

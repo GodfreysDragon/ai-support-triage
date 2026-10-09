@@ -41,6 +41,7 @@ const formatDate = (iso: string) =>
 
 <template>
     <Head title="Tickets" />
+    <h1 class="sr-only">Tickets</h1>
 
     <div class="grid gap-6 p-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
         <NewTicketForm />
