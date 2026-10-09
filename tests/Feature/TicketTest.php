@@ -115,7 +115,7 @@ test('the reply endpoint streams deltas and saves the finished draft', function 
     $ticket = Ticket::factory()->triaged()->create(['subject' => 'Export is slow']);
 
     $response = $this->actingAs($ticket->user)
-        ->post(route('tickets.reply', $ticket), ['guidance' => 'Offer a call']);
+        ->post(route('tickets.reply', $ticket), ['guidance' => 'Offer a credit']);
 
     $response->assertOk();
     expect($response->headers->get('Content-Type'))->toContain('text/event-stream');
@@ -125,7 +125,7 @@ test('the reply endpoint streams deltas and saves the finished draft', function 
     $text = $deltas->pluck('text')->implode('');
 
     expect($deltas->count())->toBeGreaterThan(1)
-        ->and($text)->toContain('Export is slow')->toContain('Offer a call')
+        ->and($text)->toContain('Export is slow')->toContain('add a credit to your account')
         ->and(end($events))->toBe(['type' => 'done'])
         ->and($ticket->refresh()->draft_reply)->toBe($text);
 });

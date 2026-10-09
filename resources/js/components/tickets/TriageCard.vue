@@ -33,7 +33,7 @@ const retriage = () =>
                 <Sparkles class="size-4" /> AI triage
             </CardTitle>
             <CardDescription>
-                Classified by a queued job using structured outputs.
+                Category, urgency and mood, read from the message.
             </CardDescription>
         </CardHeader>
         <CardContent class="space-y-4">

@@ -64,7 +64,7 @@ test('a sample ticket fills the form, is submitted and comes back triaged', func
         ->assertValue('#subject', 'Dashboard returns 500 since this morning')
         ->press('Submit for triage')
         ->assertPathBeginsWith('/tickets/')
-        ->assertSee('Customer writes about: Dashboard returns 500 since this morning')
+        ->assertSee('Since about 9am every page in the dashboard returns a 500 error for our whole team.')
         ->assertSee('High') // the fake driver's keyword rules (the real model says urgent)
         ->assertNoJavaScriptErrors();
 });
@@ -73,6 +73,7 @@ test('a failed ticket shows the error and can be retried', function () {
     $this->actingAs($user = User::factory()->create());
     $ticket = Ticket::factory()->for($user)->create([
         'subject' => 'Cannot log in',
+        'body' => 'Since this morning I cannot log in. The page just reloads.',
         'status' => TicketStatus::Failed,
         'error' => 'The AI service is unavailable.',
     ]);
@@ -81,7 +82,8 @@ test('a failed ticket shows the error and can be retried', function () {
         ->assertSee('Triage failed')
         ->assertSee('The AI service is unavailable.')
         ->press('Retry triage')
-        ->assertSee('Customer writes about: Cannot log in')
+        ->assertSee('Since this morning I cannot log in.')
+        ->assertSee('Account')
         ->assertDontSee('Triage failed')
         ->assertNoJavaScriptErrors();
 
