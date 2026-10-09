@@ -75,6 +75,13 @@ on every pull request and smoke-tests it, including Try the demo and a streamed 
 The free plan sleeps after 15 idle minutes (the next visit takes about a minute to wake it) and resets
 its disk on restart, which suits throwaway demo accounts.
 
+**Keeping it awake.** A scheduled [`keep-alive` workflow](.github/workflows/keep-alive.yml) requests the
+health check every 10 minutes, so visitors don't wait for a wake-up, and fails (emailing the maintainer)
+if the demo is down. GitHub can delay scheduled runs and pauses them after 60 days without repository
+activity. A dependable alternative is a free [UptimeRobot](https://uptimerobot.com) account: add an
+HTTP(s) monitor for the `/up` URL at a 5-minute interval. It runs on time and can alert by email or app.
+One always-on service fits within Render's 750 free hours a month.
+
 ## Engineering highlights
 
 | Concern                               | How                                                                                     |
